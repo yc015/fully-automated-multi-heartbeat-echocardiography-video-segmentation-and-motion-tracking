@@ -17,8 +17,6 @@ If you use our code in your work or you find it useful, please cite the article 
 
 Chen, Yida, Xiaoyan Zhang, Christopher M. Haggerty, and Joshua V. Stough. "Fully automated multi-heartbeat echocardiography video segmentation and motion tracking." In Medical Imaging 2022: Image Processing. International Society for Optics and Photonics, 2022.
 
-Chen, Yida, Xiaoyan Zhang, Christopher M. Haggerty, and Joshua V. Stough. "Assessing the generalizability of temporally coherent echocardiography video segmentation." In Medical Imaging 2021: Image Processing, vol. 11596, p. 115961O. International Society for Optics and Photonics, 2021.
-
 ## License & Disclaimer
 
 The project is released under the MIT license. The code has not been tested for any medical applications.
