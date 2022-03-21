@@ -11,6 +11,8 @@ Example usage: `python motion_segment.py -p <path to the ultrasound video file> 
 echonet_r2plus1d_notebooks: Notebooks for training and validating our CLAS-FV framework  
 src: Source codes
 
+**Pretrained Model Weights** is available here: [https://drive.google.com/drive/folders/1NZ4A7hjfiztb-ud0IP4JahVn1EcMYDsP?usp=sharing](https://drive.google.com/drive/folders/1NZ4A7hjfiztb-ud0IP4JahVn1EcMYDsP?usp=sharing).
+
 ## Citation
 
 If you use our code in your work or you find it useful, please cite the article below (or see our [bibtex](citations.bib)):
