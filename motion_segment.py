@@ -6,6 +6,7 @@ import echonet
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 import cv2
 import numpy as np
@@ -50,13 +51,16 @@ ap.add_argument("-o", "--output", required=False, type=str,
                 default=".")
 
 # Verbosity
-ap.add_argument("-v", "--verbose", required=False, type=bool, help="Verbosity",
-                default=True)
+ap.add_argument("-v", "--verbose", action='store_true', help="Verbosity")
 
 ap.add_argument("-c", "--content", required=False, type=str, help="Content of the output: gif, binary, binary_video, all",
                 default="binary")
 
-# Prin
+ap.add_argument("--height", required=False, type=int, help="Height of image (pretrain model uses 112)",
+                default=112)
+
+ap.add_argument("--width", required=False, type=int, help="Width of image (pretrain model uses 112)",
+                default=112)
 
 args = ap.parse_args()
 
@@ -73,7 +77,31 @@ model.eval();
 
 # See https://github.com/echonet/dynamic/blob/108518f305dbd729c4dca5da636601ebd388f77d/echonet/utils/__init__.py#L33
 # and See https://stackoverflow.com/a/42166299
-video = echonet.utils.loadvideo(args.path).astype(np.float32)
+capture = cv2.VideoCapture(args.path)
+
+frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+frame_width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+frame_height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+video = np.zeros((frame_count, frame_height, frame_width, 3), np.uint8)
+
+for count in range(frame_count):
+    ret, frame = capture.read()
+    if not ret:
+        raise ValueError("Failed to load frame #{} of {}.".format(count, filename))
+
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    video[count, :, :] = frame
+
+video = video.transpose((3, 0, 1, 2)).astype(np.float32)
+
+# Pretrained model use the spatial size 112 x 112
+# Rescale the video into that spatial size with trilinear interpolation
+video = torch.Tensor(video).unsqueeze(0)
+video = F.interpolate(video, size=(video.shape[2], args.height, args.width), 
+                      mode="trilinear", 
+                      align_corners=True)
+video = video.squeeze().numpy()
 
 video = zeroone_normalizer(video)
 
@@ -84,7 +112,7 @@ segmentations = segment_a_video_with_fusion(video, model=model, interpolate_last
                                             fuse_method=args.fuse_method, class_list=class_list)
 
 predicted_efs, edes_pairs = compute_ef_using_putative_clips(segmentations, test_pat_index=args.path,
-                                                            return_edes=True)
+                                                                return_edes=True)
 
 if args.verbose:
     print("Identified {:d} systoles".format(len(predicted_efs)))
